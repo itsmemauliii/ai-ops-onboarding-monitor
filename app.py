@@ -1,9 +1,10 @@
 import streamlit as st
+import time
 
 st.set_page_config(layout="wide")
 
 # -----------------------------
-# Session State Setup
+# SESSION STATE INIT
 # -----------------------------
 
 if "logged_in" not in st.session_state:
@@ -15,176 +16,176 @@ if "page" not in st.session_state:
 if "theme" not in st.session_state:
     st.session_state.theme = "Dark"
 
+if "login_failed" not in st.session_state:
+    st.session_state.login_failed = False
+
 # -----------------------------
-# THEME STYLES
+# THEME ENGINE
 # -----------------------------
 
 def apply_theme():
 
     if st.session_state.theme == "Dark":
-        st.markdown("""
-        <style>
-        body { background-color:#0e1117; color:white; }
-        .stApp { background-color:#0e1117; color:white; }
-        </style>
-        """, unsafe_allow_html=True)
+        bg = "#0E1117"
+        text = "white"
 
     elif st.session_state.theme == "Light":
-        st.markdown("""
-        <style>
-        body { background-color:white; color:black; }
-        .stApp { background-color:white; color:black; }
-        </style>
-        """, unsafe_allow_html=True)
+        bg = "#F5F7FA"
+        text = "#111111"
 
     elif st.session_state.theme == "Rainbow":
         st.markdown("""
         <style>
         .stApp {
             background: linear-gradient(135deg,
-            #ff0000,
-            #ff7f00,
-            #ffff00,
-            #00ff00,
-            #0000ff,
-            #4b0082,
-            #9400d3);
+            #ff0000,#ff7f00,#ffff00,
+            #00ff00,#0000ff,#4b0082,#9400d3);
             background-size: 400% 400%;
             animation: gradientMove 10s ease infinite;
             color: white !important;
         }
-
         @keyframes gradientMove {
             0% { background-position:0% 50% }
             50% { background-position:100% 50% }
             100% { background-position:0% 50% }
         }
-
-        h1, h2, h3, h4, h5, h6, p, span, div {
-            color: white !important;
-            font-weight: 500;
-        }
-
-        .stMetric {
-            background: rgba(0,0,0,0.6);
-            padding:15px;
-            border-radius:12px;
-        }
-
-        button {
-            background-color:black !important;
+        h1,h2,h3,h4,h5,h6,p,span,div {
             color:white !important;
-            border-radius:10px !important;
         }
-
         </style>
         """, unsafe_allow_html=True)
+        return
+
+    st.markdown(f"""
+    <style>
+    .stApp {{
+        background-color: {bg};
+        color: {text};
+    }}
+    </style>
+    """, unsafe_allow_html=True)
 
 apply_theme()
 
 # -----------------------------
-# Landing Page
+# LOGIN PAGE
 # -----------------------------
 
 if not st.session_state.logged_in:
 
     st.markdown("""
     <style>
-    .login-container {
+    .login-wrapper {
         display:flex;
         justify-content:center;
         align-items:center;
-        height:80vh;
+        height:100vh;
     }
-
     .login-card {
         background: rgba(255,255,255,0.05);
-        backdrop-filter: blur(15px);
-        padding: 60px;
-        border-radius: 20px;
+        backdrop-filter: blur(20px);
+        padding:60px;
+        border-radius:20px;
+        width:420px;
         text-align:center;
-        box-shadow: 0 0 40px rgba(0,0,0,0.4);
-        animation: floatCard 4s ease-in-out infinite;
+        box-shadow:0 0 60px rgba(0,0,0,0.6);
+        animation: fadeIn 1s ease;
     }
-
-    @keyframes floatCard {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
+    @keyframes fadeIn {
+        from {opacity:0; transform: translateY(20px);}
+        to {opacity:1; transform: translateY(0);}
     }
-
-    .login-title {
-        font-size: 42px;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 10px;
+    .typing {
+        overflow: hidden;
+        white-space: nowrap;
+        border-right: 3px solid orange;
+        width: 0;
+        animation: typing 3s steps(40,end) forwards, blink .8s infinite;
+        margin:15px auto 30px auto;
+        color:#bbbbbb;
     }
-
-    .login-subtitle {
-        font-size: 18px;
-        color: #cccccc;
-        margin-bottom: 40px;
+    @keyframes typing {
+        from { width: 0 }
+        to { width: 100% }
     }
-
-    .login-btn button {
-        background: linear-gradient(90deg, #ff6a00, #ee0979);
-        color: white !important;
-        font-weight: 600;
-        border-radius: 30px;
-        padding: 12px 40px;
-        font-size: 16px;
-        border: none;
-        transition: 0.3s ease;
+    @keyframes blink {
+        50% { border-color: transparent }
     }
-
-    .login-btn button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(255,105,180,0.6);
+    .shake { animation: shake 0.4s; }
+    @keyframes shake {
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
     }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    st.markdown('<div class="login-wrapper">', unsafe_allow_html=True)
 
-    st.markdown('<div class="login-title">🚀 AI Ops Intelligence Platform</div>', unsafe_allow_html=True)
-    st.markdown('<div class="login-subtitle">Operational visibility for AI-powered SaaS products</div>', unsafe_allow_html=True)
+    card_class = "login-card"
+    if st.session_state.login_failed:
+        card_class += " shake"
 
-    st.markdown('<div class="login-btn">', unsafe_allow_html=True)
-    if st.button("Enter Platform"):
-        st.session_state.logged_in = True
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="{card_class}">', unsafe_allow_html=True)
 
-    st.markdown('</div></div>', unsafe_allow_html=True)
+    st.markdown("## 🚀 AI Ops Platform")
+    st.markdown('<div class="typing">Secure Access to Your AI Infrastructure</div>', unsafe_allow_html=True)
 
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+    remember = st.checkbox("Remember Me")
+
+    login_btn = st.button("Login", type="primary")
+
+    if login_btn:
+        if email == "admin@aiops.com" and password == "1234":
+            st.session_state.login_failed = False
+
+            loader = st.empty()
+            for i in range(101):
+                loader.markdown(f"### 🍬 Cooking Sweet Intelligence... {i}%")
+                time.sleep(0.02)
+            loader.empty()
+
+            st.session_state.logged_in = True
+            st.rerun()
+        else:
+            st.session_state.login_failed = True
+            st.error("Invalid credentials. Use admin@aiops.com / 1234")
+
+    st.markdown("</div></div>", unsafe_allow_html=True)
     st.stop()
 
 # -----------------------------
-# Custom Navbar
+# NAVBAR
 # -----------------------------
 
-nav1, nav2, nav3, nav4 = st.columns([2,1,1,1])
+col1, col2, col3, col4, col5 = st.columns([3,1,1,1,1])
 
-with nav1:
+with col1:
     st.markdown("### 🤖 AI Ops Monitor")
 
-with nav2:
+with col2:
     if st.button("Dashboard"):
         st.session_state.page = "Dashboard"
 
-with nav3:
+with col3:
     if st.button("Billing"):
         st.session_state.page = "Billing"
 
-with nav4:
+with col4:
     if st.button("Settings"):
         st.session_state.page = "Settings"
+
+with col5:
+    if st.button("Logout"):
+        st.session_state.logged_in = False
+        st.rerun()
 
 st.divider()
 
 # -----------------------------
-# Page Router
+# ROUTER
 # -----------------------------
 
 if st.session_state.page == "Dashboard":
