@@ -10,19 +10,16 @@ def render():
         st.subheader("Starter")
         st.write("$29/month")
         st.write("Basic analytics")
-        if st.button("Choose Starter"):
-            st.success("Starter Activated")
+        st.button("Choose Starter")
 
     with col2:
         st.subheader("Growth")
         st.write("$99/month")
         st.write("Advanced analytics + alerts")
-        if st.button("Choose Growth"):
-            st.success("Growth Activated")
+        st.button("Choose Growth")
 
     with col3:
         st.subheader("Enterprise")
         st.write("$299/month")
         st.write("Full AI monitoring suite")
-        if st.button("Choose Enterprise"):
-            st.success("Enterprise Activated")
+        st.button("Choose Enterprise")
