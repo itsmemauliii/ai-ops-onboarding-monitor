@@ -2,25 +2,57 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-st.set_page_config(page_title="AI Ops Monitor", layout="wide")
-
-st.title("🚀 AI Ops Monitoring Platform")
-st.subheader("Enterprise SaaS Onboarding Bot Intelligence")
+st.set_page_config(
+    page_title="AI Ops Monitor",
+    page_icon="🤖",
+    layout="wide"
+)
 
 # -----------------------------
-# Sidebar Configuration
+# Custom Minimal Styling
 # -----------------------------
 
-st.sidebar.header("Configuration")
+st.markdown("""
+<style>
+.main {
+    background-color: #0E1117;
+}
+.block-container {
+    padding-top: 2rem;
+}
+h1, h2, h3 {
+    color: #FFFFFF;
+}
+.metric-card {
+    background-color: #1C1F26;
+    padding: 20px;
+    border-radius: 12px;
+}
+</style>
+""", unsafe_allow_html=True)
 
-tier = st.sidebar.selectbox(
+# -----------------------------
+# Header
+# -----------------------------
+
+st.title("🤖 AI Onboarding Intelligence Platform")
+st.caption("Operational Visibility for AI-Powered SaaS Products")
+
+st.divider()
+
+# -----------------------------
+# Sidebar
+# -----------------------------
+
+st.sidebar.header("Plan Configuration")
+
+tier = st.sidebar.radio(
     "Select Pricing Tier",
     ["Starter", "Growth", "Enterprise"]
 )
 
 uploaded_file = st.sidebar.file_uploader("Upload AI Log CSV", type=["csv"])
 
-# Tier-based settings
 if tier == "Starter":
     accuracy_threshold = 80
     review_cost = 2
@@ -54,84 +86,82 @@ total_sessions = len(df)
 accuracy = df["is_correct"].mean() * 100
 escalation_rate = df["escalation_flag"].mean() * 100
 avg_response_time = df["response_time"].mean()
-
 error_count = len(df[df["error_type"] != "none"])
 estimated_loss = error_count * review_cost
 
 # -----------------------------
-# KPI Display
+# KPI Display (Cleaner Layout)
 # -----------------------------
+
+st.subheader("📊 Core Performance Metrics")
 
 col1, col2, col3, col4 = st.columns(4)
 
-col1.metric("Total Sessions", total_sessions)
-col2.metric("Accuracy (%)", f"{accuracy:.2f}")
-col3.metric("Escalation Rate (%)", f"{escalation_rate:.2f}")
-col4.metric("Avg Response Time (s)", f"{avg_response_time:.2f}")
+col1.metric("Total Sessions", f"{total_sessions:,}")
+col2.metric("Accuracy", f"{accuracy:.2f}%")
+col3.metric("Escalation Rate", f"{escalation_rate:.2f}%")
+col4.metric("Avg Response Time", f"{avg_response_time:.2f}s")
 
 st.divider()
 
 # -----------------------------
-# Retraining Alert
+# Model Health Status
 # -----------------------------
+
+st.subheader("🧠 Model Health Status")
 
 if accuracy < accuracy_threshold:
-    st.error(f"⚠ Retraining Recommended (Threshold: {accuracy_threshold}%)")
+    st.error(f"Performance Below Threshold ({accuracy_threshold}%) — Retraining Recommended")
 else:
-    st.success("✅ Model Within Acceptable Performance Range")
+    st.success("Model Performing Within Acceptable Range")
 
 st.divider()
 
 # -----------------------------
-# Feature Gated Analytics
+# Tier-Based Analytics
 # -----------------------------
 
-if tier == "Starter":
-    st.info("Starter Plan: Limited Analytics View")
+st.subheader("📈 Performance Insights")
 
-    st.subheader("Error Breakdown")
-    error_counts = df["error_type"].value_counts().reset_index()
-    error_counts.columns = ["error_type", "count"]
-    fig_errors = px.bar(error_counts, x="error_type", y="count")
-    st.plotly_chart(fig_errors, use_container_width=True)
+error_counts = df["error_type"].value_counts().reset_index()
+error_counts.columns = ["error_type", "count"]
 
-    st.warning("Upgrade to Growth to unlock accuracy trends and step analysis.")
+fig_errors = px.bar(
+    error_counts,
+    x="error_type",
+    y="count",
+    title="Error Breakdown"
+)
 
-elif tier == "Growth":
-    st.subheader("Error Breakdown")
-    error_counts = df["error_type"].value_counts().reset_index()
-    error_counts.columns = ["error_type", "count"]
-    fig_errors = px.bar(error_counts, x="error_type", y="count")
-    st.plotly_chart(fig_errors, use_container_width=True)
+st.plotly_chart(fig_errors, use_container_width=True)
 
-    st.subheader("Accuracy Trend Over Time")
+if tier in ["Growth", "Enterprise"]:
     daily_accuracy = df.groupby("timestamp")["is_correct"].mean().reset_index()
     daily_accuracy["is_correct"] *= 100
-    fig_trend = px.line(daily_accuracy, x="timestamp", y="is_correct")
+
+    fig_trend = px.line(
+        daily_accuracy,
+        x="timestamp",
+        y="is_correct",
+        title="Accuracy Trend Over Time"
+    )
+
     st.plotly_chart(fig_trend, use_container_width=True)
 
-elif tier == "Enterprise":
-    st.subheader("Error Breakdown")
-    error_counts = df["error_type"].value_counts().reset_index()
-    error_counts.columns = ["error_type", "count"]
-    fig_errors = px.bar(error_counts, x="error_type", y="count")
-    st.plotly_chart(fig_errors, use_container_width=True)
-
-    st.subheader("Accuracy Trend Over Time")
-    daily_accuracy = df.groupby("timestamp")["is_correct"].mean().reset_index()
-    daily_accuracy["is_correct"] *= 100
-    fig_trend = px.line(daily_accuracy, x="timestamp", y="is_correct")
-    st.plotly_chart(fig_trend, use_container_width=True)
-
-    st.subheader("Onboarding Step Performance")
+if tier == "Enterprise":
     step_accuracy = df.groupby("onboarding_step")["is_correct"].mean().reset_index()
     step_accuracy["is_correct"] *= 100
-    fig_steps = px.bar(step_accuracy, x="onboarding_step", y="is_correct")
+
+    fig_steps = px.bar(
+        step_accuracy,
+        x="onboarding_step",
+        y="is_correct",
+        title="Onboarding Step Performance"
+    )
+
     st.plotly_chart(fig_steps, use_container_width=True)
 
-    # -----------------------------
-    # Churn Risk Logic
-    # -----------------------------
+    # Churn Risk
     churn_risk = 0
 
     if accuracy < 85:
@@ -150,18 +180,25 @@ elif tier == "Enterprise":
 
     churn_risk = min(churn_risk, 100)
 
-    st.subheader("⚠ Predictive Churn Risk Score")
-    st.metric("Churn Risk (%)", churn_risk)
+    st.subheader("⚠ Churn Risk Indicator")
 
-# -----------------------------
-# Revenue Impact
-# -----------------------------
+    if churn_risk < 30:
+        st.success(f"Low Risk — {churn_risk}%")
+    elif churn_risk < 60:
+        st.warning(f"Moderate Risk — {churn_risk}%")
+    else:
+        st.error(f"High Risk — {churn_risk}%")
 
 st.divider()
-st.subheader("💰 Financial Impact Estimation")
 
-st.metric("Estimated Monthly Quality Loss ($)", f"{estimated_loss:.2f}")
-st.caption(f"Based on ${review_cost} review cost per error for {tier} tier.")
+# -----------------------------
+# Financial Impact Section
+# -----------------------------
+
+st.subheader("💰 Financial Impact")
+
+st.metric("Estimated Monthly Quality Loss", f"${estimated_loss:,.2f}")
+st.caption(f"Calculated using ${review_cost} review cost per error under {tier} plan.")
 
 # -----------------------------
 # Upgrade CTA
@@ -169,22 +206,20 @@ st.caption(f"Based on ${review_cost} review cost per error for {tier} tier.")
 
 if tier in ["Starter", "Growth"]:
     st.markdown("---")
-    st.markdown("### 🚀 Unlock Advanced AI Intelligence")
+    st.info("Upgrade to Enterprise for Predictive Churn & Advanced Insights")
     st.button("Upgrade Plan")
 
 # -----------------------------
 # Executive Summary
 # -----------------------------
 
-st.markdown("---")
-st.subheader("Executive Summary")
+st.divider()
+st.subheader("📋 Executive Summary")
 
-summary_text = f"""
-This onboarding AI processed {total_sessions} sessions.
-Current accuracy stands at {accuracy:.2f}%.
-Escalation rate is {escalation_rate:.2f}%.
-Estimated monthly quality-related loss: ${estimated_loss:.2f}.
-Selected tier: {tier}.
-"""
-
-st.text(summary_text)
+st.markdown(f"""
+- Total Sessions Processed: **{total_sessions:,}**
+- Current Accuracy: **{accuracy:.2f}%**
+- Escalation Rate: **{escalation_rate:.2f}%**
+- Estimated Monthly Quality Loss: **${estimated_loss:,.2f}**
+- Active Plan: **{tier}**
+""")
