@@ -27,62 +27,54 @@ tier = st.sidebar.radio(
 uploaded_file = st.sidebar.file_uploader("Upload AI Log CSV", type=["csv"])
 
 # -----------------------------
-# Theme System
+# Theme Setup
 # -----------------------------
 
 if ui_mode == "Dark Mode":
     bg_color = "#0E1117"
     card_color = "#1C1F26"
-    text_color = "white"
-    header_gradient = None
+    text_color = "#FFFFFF"
+    header_block = False
 
 elif ui_mode == "Light Mode":
     bg_color = "#F4F6FA"
     card_color = "#FFFFFF"
     text_color = "#111111"
-    header_gradient = None
+    header_block = False
 
 elif ui_mode == "Rainbow Mode":
     bg_color = "#0E1117"
-    card_color = "rgba(255,255,255,0.08)"
-    text_color = "white"
-    header_gradient = "linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff)"
+    card_color = "#1C1F26"
+    text_color = "#FFFFFF"
+    header_block = True
 
-# -----------------------------
-# Force Text Visibility (Fix)
-# -----------------------------
-
+# Apply Clean CSS
 st.markdown(f"""
 <style>
 .stApp {{
     background-color: {bg_color};
-    color: {text_color};
-}}
-
-* {{
-    color: {text_color} !important;
-}}
-
-section[data-testid="stSidebar"] {{
-    background-color: {card_color};
 }}
 
 .block-container {{
     padding-top: 2rem;
 }}
 
+section[data-testid="stSidebar"] {{
+    background-color: {card_color};
+}}
+
 div[data-testid="metric-container"] {{
     background-color: {card_color};
-    padding: 15px;
-    border-radius: 15px;
+    padding: 18px;
+    border-radius: 12px;
 }}
 
-div[data-testid="stAlert"] {{
-    color: white !important;
+h1, h2, h3, h4 {{
+    color: {text_color};
 }}
 
-h1, h2, h3, h4, p, label, span {{
-    color: {text_color} !important;
+p, label {{
+    color: {text_color};
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -91,18 +83,17 @@ h1, h2, h3, h4, p, label, span {{
 # Header
 # -----------------------------
 
-if ui_mode == "Rainbow Mode":
-    st.markdown(f"""
-    <div style='
+if header_block:
+    st.markdown("""
+    <div style="
         padding: 30px;
-        border-radius: 20px;
-        background: {header_gradient};
+        border-radius: 15px;
+        background: linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff);
         text-align: center;
-        font-size: 2.5rem;
-        font-weight: bold;
+        font-size: 2.4rem;
+        font-weight: 700;
         color: white;
-        margin-bottom: 20px;
-    '>
+        margin-bottom: 20px;">
         🌈 AI Intelligence Command Center
     </div>
     """, unsafe_allow_html=True)
@@ -114,7 +105,7 @@ st.caption("Operational Visibility for AI-Powered SaaS Products")
 st.divider()
 
 # -----------------------------
-# Pricing Config
+# Plan Logic
 # -----------------------------
 
 if tier == "Starter":
@@ -143,7 +134,7 @@ else:
 df["is_correct"] = df["error_type"] == "none"
 
 # -----------------------------
-# KPIs
+# Metrics
 # -----------------------------
 
 total_sessions = len(df)
@@ -201,39 +192,33 @@ st.metric("Estimated Monthly Quality Loss", f"${estimated_loss:,.2f}")
 st.divider()
 
 # -----------------------------
-# Pricing Section (NEW)
+# Pricing Cards
 # -----------------------------
 
-st.subheader("💳 Upgrade Plans")
+st.subheader("💳 Pricing Plans")
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
     st.markdown("### Starter")
-    st.markdown("**$29 / month**")
-    st.markdown("- Basic Monitoring")
-    st.markdown("- Error Breakdown")
-    st.markdown("- Email Support")
-    if st.button("Choose Starter"):
+    st.markdown("**$29/month**")
+    st.markdown("Basic AI monitoring")
+    if st.button("Activate Starter"):
         st.success("Starter Plan Activated")
 
 with col2:
     st.markdown("### Growth")
-    st.markdown("**$99 / month**")
-    st.markdown("- Trend Analytics")
-    st.markdown("- Escalation Insights")
-    st.markdown("- Priority Support")
+    st.markdown("**$99/month**")
+    st.markdown("Trend analytics + escalation insights")
     if st.button("Upgrade to Growth"):
-        st.success("Redirecting to Payment Gateway...")
+        st.info("Redirecting to secure payment page...")
 
 with col3:
     st.markdown("### Enterprise")
-    st.markdown("**$249 / month**")
-    st.markdown("- Churn Prediction")
-    st.markdown("- Advanced AI Insights")
-    st.markdown("- Dedicated Manager")
-    if st.button("Upgrade to Enterprise"):
-        st.success("Redirecting to Enterprise Sales Team...")
+    st.markdown("**$249/month**")
+    st.markdown("Churn prediction + advanced AI intelligence")
+    if st.button("Contact Enterprise Sales"):
+        st.info("Redirecting to enterprise onboarding...")
 
 st.divider()
 
