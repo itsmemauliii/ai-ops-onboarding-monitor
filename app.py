@@ -88,12 +88,75 @@ apply_theme()
 
 if not st.session_state.logged_in:
 
-    st.title("🚀 AI Ops Intelligence Platform")
-    st.write("Operational visibility for AI-powered SaaS products")
+    st.markdown("""
+    <style>
+    .login-container {
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:80vh;
+    }
 
-    if st.button("Login to Platform"):
+    .login-card {
+        background: rgba(255,255,255,0.05);
+        backdrop-filter: blur(15px);
+        padding: 60px;
+        border-radius: 20px;
+        text-align:center;
+        box-shadow: 0 0 40px rgba(0,0,0,0.4);
+        animation: floatCard 4s ease-in-out infinite;
+    }
+
+    @keyframes floatCard {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .login-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 10px;
+    }
+
+    .login-subtitle {
+        font-size: 18px;
+        color: #cccccc;
+        margin-bottom: 40px;
+    }
+
+    .login-btn button {
+        background: linear-gradient(90deg, #ff6a00, #ee0979);
+        color: white !important;
+        font-weight: 600;
+        border-radius: 30px;
+        padding: 12px 40px;
+        font-size: 16px;
+        border: none;
+        transition: 0.3s ease;
+    }
+
+    .login-btn button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255,105,180,0.6);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="login-container">', unsafe_allow_html=True)
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+
+    st.markdown('<div class="login-title">🚀 AI Ops Intelligence Platform</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-subtitle">Operational visibility for AI-powered SaaS products</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="login-btn">', unsafe_allow_html=True)
+    if st.button("Enter Platform"):
         st.session_state.logged_in = True
         st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
     st.stop()
 
