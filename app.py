@@ -20,14 +20,14 @@ ui_mode = st.sidebar.selectbox(
 )
 
 tier = st.sidebar.radio(
-    "Select Pricing Tier",
+    "Active Plan",
     ["Starter", "Growth", "Enterprise"]
 )
 
 uploaded_file = st.sidebar.file_uploader("Upload AI Log CSV", type=["csv"])
 
 # -----------------------------
-# Theme Logic
+# Theme System
 # -----------------------------
 
 if ui_mode == "Dark Mode":
@@ -37,20 +37,19 @@ if ui_mode == "Dark Mode":
     header_gradient = None
 
 elif ui_mode == "Light Mode":
-    bg_color = "#F5F7FA"
+    bg_color = "#F4F6FA"
     card_color = "#FFFFFF"
     text_color = "#111111"
     header_gradient = None
 
 elif ui_mode == "Rainbow Mode":
-    # Premium Rainbow (readable)
-    bg_color = "#0E1117"   # Keep base dark
+    bg_color = "#0E1117"
     card_color = "rgba(255,255,255,0.08)"
     text_color = "white"
     header_gradient = "linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff)"
 
 # -----------------------------
-# Apply CSS
+# Force Text Visibility (Fix)
 # -----------------------------
 
 st.markdown(f"""
@@ -58,6 +57,10 @@ st.markdown(f"""
 .stApp {{
     background-color: {bg_color};
     color: {text_color};
+}}
+
+* {{
+    color: {text_color} !important;
 }}
 
 section[data-testid="stSidebar"] {{
@@ -74,8 +77,12 @@ div[data-testid="metric-container"] {{
     border-radius: 15px;
 }}
 
-h1, h2, h3, h4 {{
-    color: {text_color};
+div[data-testid="stAlert"] {{
+    color: white !important;
+}}
+
+h1, h2, h3, h4, p, label, span {{
+    color: {text_color} !important;
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -107,7 +114,7 @@ st.caption("Operational Visibility for AI-Powered SaaS Products")
 st.divider()
 
 # -----------------------------
-# Tier Logic
+# Pricing Config
 # -----------------------------
 
 if tier == "Starter":
@@ -182,18 +189,6 @@ error_counts.columns = ["error_type", "count"]
 fig_errors = px.bar(error_counts, x="error_type", y="count")
 st.plotly_chart(fig_errors, use_container_width=True)
 
-if tier in ["Growth", "Enterprise"]:
-    daily_accuracy = df.groupby("timestamp")["is_correct"].mean().reset_index()
-    daily_accuracy["is_correct"] *= 100
-    fig_trend = px.line(daily_accuracy, x="timestamp", y="is_correct")
-    st.plotly_chart(fig_trend, use_container_width=True)
-
-if tier == "Enterprise":
-    step_accuracy = df.groupby("onboarding_step")["is_correct"].mean().reset_index()
-    step_accuracy["is_correct"] *= 100
-    fig_steps = px.bar(step_accuracy, x="onboarding_step", y="is_correct")
-    st.plotly_chart(fig_steps, use_container_width=True)
-
 st.divider()
 
 # -----------------------------
@@ -202,6 +197,43 @@ st.divider()
 
 st.subheader("💰 Financial Impact")
 st.metric("Estimated Monthly Quality Loss", f"${estimated_loss:,.2f}")
+
+st.divider()
+
+# -----------------------------
+# Pricing Section (NEW)
+# -----------------------------
+
+st.subheader("💳 Upgrade Plans")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.markdown("### Starter")
+    st.markdown("**$29 / month**")
+    st.markdown("- Basic Monitoring")
+    st.markdown("- Error Breakdown")
+    st.markdown("- Email Support")
+    if st.button("Choose Starter"):
+        st.success("Starter Plan Activated")
+
+with col2:
+    st.markdown("### Growth")
+    st.markdown("**$99 / month**")
+    st.markdown("- Trend Analytics")
+    st.markdown("- Escalation Insights")
+    st.markdown("- Priority Support")
+    if st.button("Upgrade to Growth"):
+        st.success("Redirecting to Payment Gateway...")
+
+with col3:
+    st.markdown("### Enterprise")
+    st.markdown("**$249 / month**")
+    st.markdown("- Churn Prediction")
+    st.markdown("- Advanced AI Insights")
+    st.markdown("- Dedicated Manager")
+    if st.button("Upgrade to Enterprise"):
+        st.success("Redirecting to Enterprise Sales Team...")
 
 st.divider()
 
