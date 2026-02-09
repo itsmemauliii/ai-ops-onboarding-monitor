@@ -2,7 +2,7 @@ import streamlit as st
 
 def render():
 
-    st.title("📊 Dashboard")
+    st.title("Dashboard")
 
     col1, col2, col3, col4 = st.columns(4)
 
@@ -11,5 +11,4 @@ def render():
     col3.metric("Escalation Rate", "6%")
     col4.metric("Avg Response Time", "1.2s")
 
-    st.divider()
     st.success("System Operational")
