@@ -4,7 +4,42 @@ import time
 st.set_page_config(layout="wide")
 
 # -----------------------------
-# SESSION STATE INIT
+# WHITE LABEL CSS
+# -----------------------------
+
+st.markdown("""
+<style>
+
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+[data-testid="stToolbar"] {display: none;}
+[data-testid="stDecoration"] {display: none;}
+
+/* Remove padding */
+.block-container {
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+/* Full height */
+html, body, [data-testid="stAppViewContainer"] {
+    height: 100%;
+}
+
+/* Prevent scroll glitch */
+body {
+    overflow-x: hidden;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# SESSION STATE
 # -----------------------------
 
 if "logged_in" not in st.session_state:
@@ -29,9 +64,24 @@ def apply_theme():
         bg = "#0E1117"
         text = "white"
 
+        st.markdown(f"""
+        <style>
+        .stApp {{
+            background-color: {bg};
+            color: {text};
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
     elif st.session_state.theme == "Light":
-        bg = "#F5F7FA"
-        text = "#111111"
+        st.markdown("""
+        <style>
+        .stApp {
+            background-color: #F5F7FA;
+            color: #111111;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
     elif st.session_state.theme == "Rainbow":
         st.markdown("""
@@ -41,7 +91,7 @@ def apply_theme():
             #ff0000,#ff7f00,#ffff00,
             #00ff00,#0000ff,#4b0082,#9400d3);
             background-size: 400% 400%;
-            animation: gradientMove 10s ease infinite;
+            animation: gradientMove 12s ease infinite;
             color: white !important;
         }
         @keyframes gradientMove {
@@ -54,16 +104,6 @@ def apply_theme():
         }
         </style>
         """, unsafe_allow_html=True)
-        return
-
-    st.markdown(f"""
-    <style>
-    .stApp {{
-        background-color: {bg};
-        color: {text};
-    }}
-    </style>
-    """, unsafe_allow_html=True)
 
 apply_theme()
 
@@ -81,6 +121,7 @@ if not st.session_state.logged_in:
         align-items:center;
         height:100vh;
     }
+
     .login-card {
         background: rgba(255,255,255,0.05);
         backdrop-filter: blur(20px);
@@ -91,10 +132,12 @@ if not st.session_state.logged_in:
         box-shadow:0 0 60px rgba(0,0,0,0.6);
         animation: fadeIn 1s ease;
     }
+
     @keyframes fadeIn {
         from {opacity:0; transform: translateY(20px);}
         to {opacity:1; transform: translateY(0);}
     }
+
     .typing {
         overflow: hidden;
         white-space: nowrap;
@@ -104,19 +147,29 @@ if not st.session_state.logged_in:
         margin:15px auto 30px auto;
         color:#bbbbbb;
     }
+
     @keyframes typing {
         from { width: 0 }
         to { width: 100% }
     }
+
     @keyframes blink {
         50% { border-color: transparent }
     }
+
     .shake { animation: shake 0.4s; }
+
     @keyframes shake {
         25% { transform: translateX(-5px); }
         50% { transform: translateX(5px); }
         75% { transform: translateX(-5px); }
     }
+
+    .stTextInput>div>div>input:focus {
+        border:1px solid orange !important;
+        box-shadow:0 0 15px orange !important;
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
@@ -137,16 +190,19 @@ if not st.session_state.logged_in:
 
     login_btn = st.button("Login", type="primary")
 
+    st.markdown("Forgot Password?")
+
     if login_btn:
         if email == "admin@aiops.com" and password == "1234":
-            st.session_state.login_failed = False
 
+            st.session_state.login_failed = False
             loader = st.empty()
+
             for i in range(101):
                 loader.markdown(f"### 🍬 Cooking Sweet Intelligence... {i}%")
                 time.sleep(0.02)
-            loader.empty()
 
+            loader.empty()
             st.session_state.logged_in = True
             st.rerun()
         else:
