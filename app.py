@@ -27,29 +27,36 @@ tier = st.sidebar.radio(
 uploaded_file = st.sidebar.file_uploader("Upload AI Log CSV", type=["csv"])
 
 # -----------------------------
-# Dynamic Themes
+# Theme Logic
 # -----------------------------
 
 if ui_mode == "Dark Mode":
     bg_color = "#0E1117"
     card_color = "#1C1F26"
     text_color = "white"
+    header_gradient = None
 
 elif ui_mode == "Light Mode":
     bg_color = "#F5F7FA"
     card_color = "#FFFFFF"
     text_color = "#111111"
+    header_gradient = None
 
 elif ui_mode == "Rainbow Mode":
-    bg_color = "linear-gradient(135deg, #1e3c72, #2a5298, #ff6a00, #ee0979)"
-    card_color = "rgba(255,255,255,0.1)"
+    # Premium Rainbow (readable)
+    bg_color = "#0E1117"   # Keep base dark
+    card_color = "rgba(255,255,255,0.08)"
     text_color = "white"
+    header_gradient = "linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff)"
 
+# -----------------------------
 # Apply CSS
+# -----------------------------
+
 st.markdown(f"""
 <style>
 .stApp {{
-    background: {bg_color};
+    background-color: {bg_color};
     color: {text_color};
 }}
 
@@ -61,9 +68,9 @@ section[data-testid="stSidebar"] {{
     padding-top: 2rem;
 }}
 
-.metric-card {{
+div[data-testid="metric-container"] {{
     background-color: {card_color};
-    padding: 20px;
+    padding: 15px;
     border-radius: 15px;
 }}
 
@@ -78,13 +85,19 @@ h1, h2, h3, h4 {{
 # -----------------------------
 
 if ui_mode == "Rainbow Mode":
-    st.markdown("""
-    <h1 style='text-align: center; font-size: 3rem; 
-    background: linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;'>
-    🌈 AI Intelligence Command Center
-    </h1>
+    st.markdown(f"""
+    <div style='
+        padding: 30px;
+        border-radius: 20px;
+        background: {header_gradient};
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 20px;
+    '>
+        🌈 AI Intelligence Command Center
+    </div>
     """, unsafe_allow_html=True)
 else:
     st.title("🤖 AI Onboarding Intelligence Platform")
@@ -94,7 +107,7 @@ st.caption("Operational Visibility for AI-Powered SaaS Products")
 st.divider()
 
 # -----------------------------
-# Pricing Tier Logic
+# Tier Logic
 # -----------------------------
 
 if tier == "Starter":
@@ -145,26 +158,27 @@ col4.metric("Avg Response Time", f"{avg_response_time:.2f}s")
 st.divider()
 
 # -----------------------------
-# Health Status
+# Model Health
 # -----------------------------
 
 st.subheader("🧠 Model Health")
 
 if accuracy < accuracy_threshold:
-    st.error("Performance Below Threshold — Retraining Recommended")
+    st.error(f"Performance Below Threshold ({accuracy_threshold}%) — Retraining Recommended")
 else:
     st.success("Model Performing Within Acceptable Range")
 
 st.divider()
 
 # -----------------------------
-# Analytics
+# Insights
 # -----------------------------
 
 st.subheader("📈 Insights")
 
 error_counts = df["error_type"].value_counts().reset_index()
 error_counts.columns = ["error_type", "count"]
+
 fig_errors = px.bar(error_counts, x="error_type", y="count")
 st.plotly_chart(fig_errors, use_container_width=True)
 
@@ -202,5 +216,5 @@ st.markdown(f"""
 - Accuracy: **{accuracy:.2f}%**
 - Escalation Rate: **{escalation_rate:.2f}%**
 - Estimated Monthly Loss: **${estimated_loss:,.2f}**
-- Plan: **{tier}**
+- Active Plan: **{tier}**
 """)
