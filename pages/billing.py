@@ -2,21 +2,27 @@ import streamlit as st
 
 def render():
 
-    st.title("💳 Billing & Subscription")
+    st.title("💳 Billing & Plans")
 
-    st.subheader("Current Plan: Growth")
-    st.success("Your subscription is active.")
-
-    st.divider()
-
-    st.subheader("Upgrade Plan")
-
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("Upgrade to Enterprise"):
-            st.info("Redirecting to payment gateway...")
+        st.subheader("Starter")
+        st.write("$29/month")
+        st.write("Basic analytics")
+        if st.button("Choose Starter"):
+            st.success("Starter Activated")
 
     with col2:
-        if st.button("Downgrade to Starter"):
-            st.warning("Plan will change next billing cycle.")
+        st.subheader("Growth")
+        st.write("$99/month")
+        st.write("Advanced analytics + alerts")
+        if st.button("Choose Growth"):
+            st.success("Growth Activated")
+
+    with col3:
+        st.subheader("Enterprise")
+        st.write("$299/month")
+        st.write("Full AI monitoring suite")
+        if st.button("Choose Enterprise"):
+            st.success("Enterprise Activated")
