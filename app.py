@@ -1,237 +1,107 @@
 import streamlit as st
-import pandas as pd
-import plotly.express as px
 
-st.set_page_config(
-    page_title="AI Ops Monitor",
-    page_icon="🚀",
-    layout="wide"
-)
+st.set_page_config(layout="wide")
 
 # -----------------------------
-# Sidebar
+# Session State Setup
 # -----------------------------
 
-st.sidebar.title("⚙️ Settings")
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-ui_mode = st.sidebar.selectbox(
-    "Choose UI Mode",
-    ["Dark Mode", "Light Mode", "Rainbow Mode"]
-)
-
-tier = st.sidebar.radio(
-    "Active Plan",
-    ["Starter", "Growth", "Enterprise"]
-)
-
-uploaded_file = st.sidebar.file_uploader("Upload AI Log CSV", type=["csv"])
+if "page" not in st.session_state:
+    st.session_state.page = "Dashboard"
 
 # -----------------------------
-# Theme Setup
+# Landing Page (Before Login)
 # -----------------------------
 
-if ui_mode == "Dark Mode":
-    bg_color = "#0E1117"
-    card_color = "#1C1F26"
-    text_color = "#FFFFFF"
-    header_block = False
+if not st.session_state.logged_in:
 
-elif ui_mode == "Light Mode":
-    bg_color = "#F4F6FA"
-    card_color = "#FFFFFF"
-    text_color = "#111111"
-    header_block = False
-
-elif ui_mode == "Rainbow Mode":
-    bg_color = "#0E1117"
-    card_color = "#1C1F26"
-    text_color = "#FFFFFF"
-    header_block = True
-
-# Apply Clean CSS
-st.markdown(f"""
-<style>
-.stApp {{
-    background-color: {bg_color};
-}}
-
-.block-container {{
-    padding-top: 2rem;
-}}
-
-section[data-testid="stSidebar"] {{
-    background-color: {card_color};
-}}
-
-div[data-testid="metric-container"] {{
-    background-color: {card_color};
-    padding: 18px;
-    border-radius: 12px;
-}}
-
-h1, h2, h3, h4 {{
-    color: {text_color};
-}}
-
-p, label {{
-    color: {text_color};
-}}
-</style>
-""", unsafe_allow_html=True)
-
-# -----------------------------
-# Header
-# -----------------------------
-
-if header_block:
     st.markdown("""
-    <div style="
-        padding: 30px;
-        border-radius: 15px;
-        background: linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff);
-        text-align: center;
-        font-size: 2.4rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 20px;">
-        🌈 AI Intelligence Command Center
+    <style>
+    .hero {
+        text-align:center;
+        padding:80px 20px;
+        background: linear-gradient(90deg,#0f2027,#203a43,#2c5364);
+        border-radius:20px;
+        color:white;
+    }
+    .pricing-card {
+        background:white;
+        padding:30px;
+        border-radius:15px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.1);
+        text-align:center;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="hero">
+        <h1>🚀 AI Ops Intelligence Platform</h1>
+        <p>Operational visibility for AI-powered SaaS products</p>
     </div>
     """, unsafe_allow_html=True)
-else:
-    st.title("🤖 AI Onboarding Intelligence Platform")
 
-st.caption("Operational Visibility for AI-Powered SaaS Products")
+    st.write("")
+    st.write("")
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown('<div class="pricing-card"><h3>Starter</h3><h2>$29</h2><p>Basic monitoring</p></div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="pricing-card"><h3>Growth</h3><h2>$99</h2><p>Analytics & insights</p></div>', unsafe_allow_html=True)
+
+    with col3:
+        st.markdown('<div class="pricing-card"><h3>Enterprise</h3><h2>$249</h2><p>Full AI intelligence suite</p></div>', unsafe_allow_html=True)
+
+    st.write("")
+    st.write("")
+
+    if st.button("Login to Platform"):
+        st.session_state.logged_in = True
+        st.rerun()
+
+    st.stop()
+
+# -----------------------------
+# Custom Navbar
+# -----------------------------
+
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([2,1,1,1])
+
+with nav_col1:
+    st.markdown("### 🤖 AI Ops Monitor")
+
+with nav_col2:
+    if st.button("Dashboard"):
+        st.session_state.page = "Dashboard"
+
+with nav_col3:
+    if st.button("Billing"):
+        st.session_state.page = "Billing"
+
+with nav_col4:
+    if st.button("Settings"):
+        st.session_state.page = "Settings"
 
 st.divider()
 
 # -----------------------------
-# Plan Logic
+# Page Router
 # -----------------------------
 
-if tier == "Starter":
-    accuracy_threshold = 80
-    review_cost = 2
-elif tier == "Growth":
-    accuracy_threshold = 85
-    review_cost = 1.5
-else:
-    accuracy_threshold = 90
-    review_cost = 1
+if st.session_state.page == "Dashboard":
+    import pages.dashboard as dashboard
+    dashboard.render()
 
-# -----------------------------
-# Load Data
-# -----------------------------
+elif st.session_state.page == "Billing":
+    import pages.billing as billing
+    billing.render()
 
-@st.cache_data
-def load_data(file):
-    return pd.read_csv(file, parse_dates=["timestamp"])
-
-if uploaded_file:
-    df = load_data(uploaded_file)
-else:
-    df = pd.read_csv("data/mock_logs.csv", parse_dates=["timestamp"])
-
-df["is_correct"] = df["error_type"] == "none"
-
-# -----------------------------
-# Metrics
-# -----------------------------
-
-total_sessions = len(df)
-accuracy = df["is_correct"].mean() * 100
-escalation_rate = df["escalation_flag"].mean() * 100
-avg_response_time = df["response_time"].mean()
-error_count = len(df[df["error_type"] != "none"])
-estimated_loss = error_count * review_cost
-
-st.subheader("📊 Performance Overview")
-
-col1, col2, col3, col4 = st.columns(4)
-
-col1.metric("Total Sessions", f"{total_sessions:,}")
-col2.metric("Accuracy", f"{accuracy:.2f}%")
-col3.metric("Escalation Rate", f"{escalation_rate:.2f}%")
-col4.metric("Avg Response Time", f"{avg_response_time:.2f}s")
-
-st.divider()
-
-# -----------------------------
-# Model Health
-# -----------------------------
-
-st.subheader("🧠 Model Health")
-
-if accuracy < accuracy_threshold:
-    st.error(f"Performance Below Threshold ({accuracy_threshold}%) — Retraining Recommended")
-else:
-    st.success("Model Performing Within Acceptable Range")
-
-st.divider()
-
-# -----------------------------
-# Insights
-# -----------------------------
-
-st.subheader("📈 Insights")
-
-error_counts = df["error_type"].value_counts().reset_index()
-error_counts.columns = ["error_type", "count"]
-
-fig_errors = px.bar(error_counts, x="error_type", y="count")
-st.plotly_chart(fig_errors, use_container_width=True)
-
-st.divider()
-
-# -----------------------------
-# Financial Impact
-# -----------------------------
-
-st.subheader("💰 Financial Impact")
-st.metric("Estimated Monthly Quality Loss", f"${estimated_loss:,.2f}")
-
-st.divider()
-
-# -----------------------------
-# Pricing Cards
-# -----------------------------
-
-st.subheader("💳 Pricing Plans")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("### Starter")
-    st.markdown("**$29/month**")
-    st.markdown("Basic AI monitoring")
-    if st.button("Activate Starter"):
-        st.success("Starter Plan Activated")
-
-with col2:
-    st.markdown("### Growth")
-    st.markdown("**$99/month**")
-    st.markdown("Trend analytics + escalation insights")
-    if st.button("Upgrade to Growth"):
-        st.info("Redirecting to secure payment page...")
-
-with col3:
-    st.markdown("### Enterprise")
-    st.markdown("**$249/month**")
-    st.markdown("Churn prediction + advanced AI intelligence")
-    if st.button("Contact Enterprise Sales"):
-        st.info("Redirecting to enterprise onboarding...")
-
-st.divider()
-
-# -----------------------------
-# Executive Summary
-# -----------------------------
-
-st.subheader("📋 Executive Summary")
-
-st.markdown(f"""
-- Sessions Processed: **{total_sessions:,}**
-- Accuracy: **{accuracy:.2f}%**
-- Escalation Rate: **{escalation_rate:.2f}%**
-- Estimated Monthly Loss: **${estimated_loss:,.2f}**
-- Active Plan: **{tier}**
-""")
+elif st.session_state.page == "Settings":
+    import pages.settings as settings
+    settings.render()
