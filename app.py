@@ -4,47 +4,20 @@ import plotly.express as px
 
 st.set_page_config(
     page_title="AI Ops Monitor",
-    page_icon="🤖",
+    page_icon="🚀",
     layout="wide"
 )
-
-# -----------------------------
-# Custom Minimal Styling
-# -----------------------------
-
-st.markdown("""
-<style>
-.main {
-    background-color: #0E1117;
-}
-.block-container {
-    padding-top: 2rem;
-}
-h1, h2, h3 {
-    color: #FFFFFF;
-}
-.metric-card {
-    background-color: #1C1F26;
-    padding: 20px;
-    border-radius: 12px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# -----------------------------
-# Header
-# -----------------------------
-
-st.title("🤖 AI Onboarding Intelligence Platform")
-st.caption("Operational Visibility for AI-Powered SaaS Products")
-
-st.divider()
 
 # -----------------------------
 # Sidebar
 # -----------------------------
 
-st.sidebar.header("Plan Configuration")
+st.sidebar.title("⚙️ Settings")
+
+ui_mode = st.sidebar.selectbox(
+    "Choose UI Mode",
+    ["Dark Mode", "Light Mode", "Rainbow Mode"]
+)
 
 tier = st.sidebar.radio(
     "Select Pricing Tier",
@@ -52,6 +25,77 @@ tier = st.sidebar.radio(
 )
 
 uploaded_file = st.sidebar.file_uploader("Upload AI Log CSV", type=["csv"])
+
+# -----------------------------
+# Dynamic Themes
+# -----------------------------
+
+if ui_mode == "Dark Mode":
+    bg_color = "#0E1117"
+    card_color = "#1C1F26"
+    text_color = "white"
+
+elif ui_mode == "Light Mode":
+    bg_color = "#F5F7FA"
+    card_color = "#FFFFFF"
+    text_color = "#111111"
+
+elif ui_mode == "Rainbow Mode":
+    bg_color = "linear-gradient(135deg, #1e3c72, #2a5298, #ff6a00, #ee0979)"
+    card_color = "rgba(255,255,255,0.1)"
+    text_color = "white"
+
+# Apply CSS
+st.markdown(f"""
+<style>
+.stApp {{
+    background: {bg_color};
+    color: {text_color};
+}}
+
+section[data-testid="stSidebar"] {{
+    background-color: {card_color};
+}}
+
+.block-container {{
+    padding-top: 2rem;
+}}
+
+.metric-card {{
+    background-color: {card_color};
+    padding: 20px;
+    border-radius: 15px;
+}}
+
+h1, h2, h3, h4 {{
+    color: {text_color};
+}}
+</style>
+""", unsafe_allow_html=True)
+
+# -----------------------------
+# Header
+# -----------------------------
+
+if ui_mode == "Rainbow Mode":
+    st.markdown("""
+    <h1 style='text-align: center; font-size: 3rem; 
+    background: linear-gradient(90deg, #ff6a00, #ee0979, #00c6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;'>
+    🌈 AI Intelligence Command Center
+    </h1>
+    """, unsafe_allow_html=True)
+else:
+    st.title("🤖 AI Onboarding Intelligence Platform")
+
+st.caption("Operational Visibility for AI-Powered SaaS Products")
+
+st.divider()
+
+# -----------------------------
+# Pricing Tier Logic
+# -----------------------------
 
 if tier == "Starter":
     accuracy_threshold = 80
@@ -79,7 +123,7 @@ else:
 df["is_correct"] = df["error_type"] == "none"
 
 # -----------------------------
-# KPI Calculations
+# KPIs
 # -----------------------------
 
 total_sessions = len(df)
@@ -89,11 +133,7 @@ avg_response_time = df["response_time"].mean()
 error_count = len(df[df["error_type"] != "none"])
 estimated_loss = error_count * review_cost
 
-# -----------------------------
-# KPI Display (Cleaner Layout)
-# -----------------------------
-
-st.subheader("📊 Core Performance Metrics")
+st.subheader("📊 Performance Overview")
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -105,121 +145,62 @@ col4.metric("Avg Response Time", f"{avg_response_time:.2f}s")
 st.divider()
 
 # -----------------------------
-# Model Health Status
+# Health Status
 # -----------------------------
 
-st.subheader("🧠 Model Health Status")
+st.subheader("🧠 Model Health")
 
 if accuracy < accuracy_threshold:
-    st.error(f"Performance Below Threshold ({accuracy_threshold}%) — Retraining Recommended")
+    st.error("Performance Below Threshold — Retraining Recommended")
 else:
     st.success("Model Performing Within Acceptable Range")
 
 st.divider()
 
 # -----------------------------
-# Tier-Based Analytics
+# Analytics
 # -----------------------------
 
-st.subheader("📈 Performance Insights")
+st.subheader("📈 Insights")
 
 error_counts = df["error_type"].value_counts().reset_index()
 error_counts.columns = ["error_type", "count"]
-
-fig_errors = px.bar(
-    error_counts,
-    x="error_type",
-    y="count",
-    title="Error Breakdown"
-)
-
+fig_errors = px.bar(error_counts, x="error_type", y="count")
 st.plotly_chart(fig_errors, use_container_width=True)
 
 if tier in ["Growth", "Enterprise"]:
     daily_accuracy = df.groupby("timestamp")["is_correct"].mean().reset_index()
     daily_accuracy["is_correct"] *= 100
-
-    fig_trend = px.line(
-        daily_accuracy,
-        x="timestamp",
-        y="is_correct",
-        title="Accuracy Trend Over Time"
-    )
-
+    fig_trend = px.line(daily_accuracy, x="timestamp", y="is_correct")
     st.plotly_chart(fig_trend, use_container_width=True)
 
 if tier == "Enterprise":
     step_accuracy = df.groupby("onboarding_step")["is_correct"].mean().reset_index()
     step_accuracy["is_correct"] *= 100
-
-    fig_steps = px.bar(
-        step_accuracy,
-        x="onboarding_step",
-        y="is_correct",
-        title="Onboarding Step Performance"
-    )
-
+    fig_steps = px.bar(step_accuracy, x="onboarding_step", y="is_correct")
     st.plotly_chart(fig_steps, use_container_width=True)
-
-    # Churn Risk
-    churn_risk = 0
-
-    if accuracy < 85:
-        churn_risk += 30
-    if escalation_rate > 15:
-        churn_risk += 30
-    if avg_response_time > 2.5:
-        churn_risk += 20
-
-    step2_accuracy = (
-        df[df["onboarding_step"] == 2]["is_correct"].mean() * 100
-    )
-
-    if step2_accuracy < 80:
-        churn_risk += 20
-
-    churn_risk = min(churn_risk, 100)
-
-    st.subheader("⚠ Churn Risk Indicator")
-
-    if churn_risk < 30:
-        st.success(f"Low Risk — {churn_risk}%")
-    elif churn_risk < 60:
-        st.warning(f"Moderate Risk — {churn_risk}%")
-    else:
-        st.error(f"High Risk — {churn_risk}%")
 
 st.divider()
 
 # -----------------------------
-# Financial Impact Section
+# Financial Impact
 # -----------------------------
 
 st.subheader("💰 Financial Impact")
-
 st.metric("Estimated Monthly Quality Loss", f"${estimated_loss:,.2f}")
-st.caption(f"Calculated using ${review_cost} review cost per error under {tier} plan.")
 
-# -----------------------------
-# Upgrade CTA
-# -----------------------------
-
-if tier in ["Starter", "Growth"]:
-    st.markdown("---")
-    st.info("Upgrade to Enterprise for Predictive Churn & Advanced Insights")
-    st.button("Upgrade Plan")
+st.divider()
 
 # -----------------------------
 # Executive Summary
 # -----------------------------
 
-st.divider()
 st.subheader("📋 Executive Summary")
 
 st.markdown(f"""
-- Total Sessions Processed: **{total_sessions:,}**
-- Current Accuracy: **{accuracy:.2f}%**
+- Sessions Processed: **{total_sessions:,}**
+- Accuracy: **{accuracy:.2f}%**
 - Escalation Rate: **{escalation_rate:.2f}%**
-- Estimated Monthly Quality Loss: **${estimated_loss:,.2f}**
-- Active Plan: **{tier}**
+- Estimated Monthly Loss: **${estimated_loss:,.2f}**
+- Plan: **{tier}**
 """)
